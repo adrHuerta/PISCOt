@@ -1,0 +1,39 @@
+Quality Control Procedure: Automático y Visual 
+Aguilar et al (2003); 
+M Skansi et al (?);
+Vicente-Serrano et al (2010)
+
+
+Automático
+
+1. General 
+ - duplicated dates, comas, -999, -888 
+
+2. Fixed ranges: 
+ - Tmax >= 60 | Tmax =< -10 
+ - Tmin >= 40 | Tmin =< -30
+
+3. Consistency among variables
+ - Tmax <= Tmin
+ - Tmax = Tmin = 0
+
+4. Temporal Coherence 
+ - Consecutive repetidos >8 days 
+ - daily Jumps > 15°C
+
+5. Spatial Coherence
+ - Only done where area highly amount of stations (jungle may is not posible)
+ - Visual inspection
+ - Estacion candiata vs estaciones vecinas (al menos 3 estaciones)
+ - Debido a la información faltante, se realizo una imputación antes de convertirles a valores de percentiles, el procedimiento dado por https://cran.r-project.org/web/packages/norm/norm.pdf
+ - Values to percentil, higher differences between the same day (78 o -78th) 
+ - Cita http://onlinelibrary.wiley.com/doi/10.1002/joc.1850/abstract
+
+
+6: Filter:
+- selección de estaciones con 10 años de datos (12 meses cada mes con al menos 20 dias de data)
+
+Visual:
+
+1) Eliminación de series con quiebres obvios y periodos con inhomogeneidades evidentes:
+2) Filter (the same prodecure of automatic QC)

@@ -1,0 +1,12 @@
+Homogenization Procedure
+Oyler et al (2014)
+
+1) Monthly homogenization: Menne and Williams (2007)
+- Pairwase comparison - snht statistic
+- similar variations in climate occur at nearby locations
+- snht package
+
+2) Daily homogenization: Similar to Vicent (2002)
+- Monthly factor to daily factor trought smoothing
+- Manthly factor to 15day
+- akima package

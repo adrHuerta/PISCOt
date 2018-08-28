@@ -1,0 +1,61 @@
+Quality Control Procedure: Automático y Visual 
+Aguilar et al (2003); 
+Vicente-Serrano et al (2010)
+Hunziker et al (2017)
+
+AUTOMATIC QC
+
+1. General 
+
+ - duplicated dates, comas, -999, -888 
+
+
+2. Extreme value check
+ 
+ - Fixed ranges: 
+ - Tmax >= 60 | Tmax =< -10 
+ - Tmin >= 40 | Tmin =< -30
+ - limits: Q25 - 4*IRQ < Temp | Q75 + IRQ*4 > Temp
+
+
+3. Internal consistency check
+
+ - Consistency among variables
+ - Tmax <= Tmin
+ - Tmax = Tmin = 0
+
+
+4. Temporal coherence check
+
+ - Consecutive repetidos >8 days 
+ - daily Jumps > 15°C
+
+
+5. Spatial coherence check
+
+ - Only done where area highly amount of stations (jungle may is not posible)
+ - Estacion candiata vs estaciones vecinas (al menos 4 estaciones)
+ - Debido a la información faltante, se realizo una imputación antes de convertirles a valores de   percentiles, el procedimiento dado por https://cran.r-project.org/web/packages/norm/norm.pdf
+ - Values to percentil, higher differences between the same day (78 o -78th) 
+ - Cita http://onlinelibrary.wiley.com/doi/10.1002/joc.1850/abstract
+
+
+ENHANCED AND VISUAL QC
+
+6. Precision inconsistencies 
+
+ - count the amount of decimales grouped (.0, .1, .. ., .9) by year
+ - years with more than 40% of data in any level is deleted
+ - years with more than 35% and 0% of data in at least three levels (anyone) at the same year is deleted
+ - years with less than 35% of data is deleted (need to define)
+
+
+7. Reduced variability 
+
+ - by data visualization
+ - Eliminación de series con quiebres obvios y periodos con inhomogeneidades evidentes:
+
+8. Filter 
+
+ - at least time series with 5 (= or >) years, a year has 60% od daily data ~
+ - only gauge data with tmax and tmin were selected
