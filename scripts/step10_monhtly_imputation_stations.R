@@ -34,7 +34,7 @@ qcstats_tn <- qc_stat_VS_tn
 
 
 length_tx <- data.frame(n = qcdata_tx %>%
-                          apply(., 2, function(x) filter_qc(xts(x, time(qcdata_tx)),  n_months = 10, monthlyTS =T) ))  %>%
+                          apply(., 2, function(x) filter_qc(xts(x, time(qcdata_tx)),  n_months = 10, monthlyTS =T) ) )  %>%
   mutate(grupo = ifelse(n >= 20, 1, 2) ) %>%
   cbind(., qcstats_tx)
 
@@ -121,7 +121,7 @@ qcdata_model_tx <- cbind(data_hm_model1, data_hm_model2); qcdata_model_tx <- qcd
 #############################
 
 length_tn <- data.frame(n = qcdata_tn %>%
-                          apply(., 2, function(x) filter_qc(xts(x, time(qcdata_tn)),  n_months = 10) ))  %>%
+                          apply(., 2, function(x) filter_qc(xts(x, time(qcdata_tn)),  monthlyTS = T, n_months = 10) ))  %>%
   mutate(grupo = ifelse(n >= 20, 1, 2) ) %>%
   cbind(., qcstats_tn)
 
@@ -198,14 +198,25 @@ qcdata_tn[, "X554"] <- qcdata_model_tn[, "X554"]
 ###### Saving data
 ######
 
-fddata_Mtxx <- qcdata_tx
-fddata_Mtnn <- qcdata_tn
-fdstats_Ms <- subset(qc_stat_VS_tn, VSS == "1")
+Mdata_txx <- qcdata_tx
+Mdata_tnn <- qcdata_tn
+Mdstats_s <- subset(qc_stat_VS_tn, VSS == "1")
 
-all(fdstats_Ms$CC == colnames(fddata_Mtxx))
-all(fdstats_Ms$CC == colnames(fddata_Mtnn))
+##### adding amount of n real_values 
+
+n_rV <- data.frame(length_tx %>% subset(VSS == 1) %>% .[,c("n", "CC")], 
+           length_tn %>% subset(VSS == 1) %>% .[,c("n", "CC")]) %>%
+  mutate(n_mean = (.[,1]+.[,3])/2) %>% .[,c("CC", "n_mean")] %>%
+  merge(., Mdstats_s, by = c("CC")) %>% .[match(Mdstats_s$CC, .$CC),]
+
+#####
+
+Mdstats_s <- data.frame(Mdstats_s, n_mean = n_rV$n_mean)
+
+all(Mdstats_s$CC == colnames(Mdata_txx))
+all(Mdstats_s$CC == colnames(Mdata_tnn))
 
 ### saving data 
 
-  save(fddata_Mtxx, fddata_Mtxx, fdstats_Ms,
-       file = file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","step09_monthly_FDDATA_06.RData"))
+  save(Mdata_txx, Mdata_tnn, Mdstats_s,
+       file = file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","step09_monthlyDATA_06.RData"))

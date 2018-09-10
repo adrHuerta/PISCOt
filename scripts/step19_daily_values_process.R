@@ -13,13 +13,12 @@ library(foreach)
 library(doParallel)
 ### source codes 
 
-source('/media/buntu/D1AB-BCDE/github_repos/PISCO_Temp/functions/interpolation_functions_2.R')
+source('/media/buntu/D1AB-BCDE/github_repos/PISCOt/functions/interpolation_functions_2.R')
 ###
 
 load(file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","danom_obs_dataset.RData"))
 load(file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","spatial_predictors.RData"))
-load(file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","monthly_tx_RASTERS_R.RData"))
-load(file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","monthly_tn_RASTERS_R.RData"))
+load(file.path("/media","buntu","D1AB-BCDE","databases","results","monthly_normals","monthly_rasters.RData"))
 file_path <- "/media/buntu/D1AB-BCDE/databases/results/daily_values/data"
 ls()
 
@@ -76,35 +75,33 @@ stopCluster(cl)
 cl <- makeCluster(12) #not to overload your computer
 registerDoParallel(cl)
 
-
-foreach(stations = 1:178, .packages=c("foreach","sp")) %dopar% {
+foreach(all_cicle = 1:13149, .packages=c("foreach","sp")) %dopar% {
   
-  leave_one_out_tn <- anom_mtn[-stations,]
-  tn_val <- foreach(all_cicle = 1:13149, .packages=c("sp","dplyr","automap","gstat")) %dopar% {
+  tn_val <- foreach(stations = 1:178, .packages=c("sp","dplyr","automap","gstat")) %dopar% {
+    leave_one_out_tn <- anom_dtn[-stations,]
     
     procestn <- get_variables2(CLIM_D = merging_tn,
                                ALL_STATICS_VAR = rest_cov_tn,
-                               OBS_DATA = anom_mtn,
+                               OBS_DATA = anom_dtn,
                                n = all_cicle,
                                name_var = c("CT"))
     
-    regKriging3(from_get_variables = procestx)$final_map}
-  save(tn_val, file = file.path(file_path_tn,"validation","tn",paste(stations,".RData", sep = "")))
+    regKriging3(from_get_variables = procestn, delR = 2.5)$final_map}
+  save(tn_val, file = file.path(file_path,"validation","tn", paste(formatC(all_cicle, width = 5,flag = 0), ".RData", sep = "")))
   
-  leave_one_out_tx <- anom_mtx[-stations,]
-  tx_val <- foreach(all_cicle = 1:13149, .packages=c("sp","dplyr","automap","gstat")) %dopar% {
+  tx_val <- foreach(stations = 1:178, .packages=c("sp","dplyr","automap","gstat")) %dopar% {
+    leave_one_out_tx <- anom_dtx[-stations,]
     
     
     procestx <- get_variables2(CLIM_D = merging_tx,
                                ALL_STATICS_VAR = rest_cov_tx,
-                               OBS_DATA = anom_mtx,
+                               OBS_DATA = anom_dtx,
                                n = all_cicle,
                                name_var = c("CT"))
     
-    regKriging3(from_get_variables = procestx)$final_map}
-  save(tx_val, file = file.path(file_path_tx,"validation","tx",paste(stations,".RData", sep = "")))
+    regKriging3(from_get_variables = procestx, delR = 2.5)$final_map}
+  save(tx_val, file = file.path(file_path,"validation","tx", paste(formatC(all_cicle, width = 5,flag = 0), ".RData", sep = "")))
   
 }
 
 stopCluster(cl)
-
