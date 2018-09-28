@@ -9,7 +9,6 @@ library(rgdal)
 
 ### source codes 
 
-source('./functions/tools_get_os.R')
 source('./functions/interpolation_functions.R')
 
 ######## gridded zone #########
@@ -20,7 +19,7 @@ projection(zone_gridd) <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,
 
 ################ DEM dataset ########################
 
-dem_data <- file.path("/media", "buntu", "D1AB-BCDE", "databases", "spatial_predictors","dem_and_others3","GMTED2010_gee.tif") %>% #dem.tif
+dem_data <- file.path("/media", "buntu", "D1AB-BCDE", "databases", "spatial_predictors","dem_and_others3","GMTED2010_gee.tif") %>% #
   raster()
 #  crop(., extent(zone_gridd)) %>%
 #  resample(., zone_gridd)
@@ -99,61 +98,93 @@ names(tn_lst) <- paste("LST", 1:12, sep = "")
 
 ##### TDI ###############
 
-elev = dem_data
-
-### 10km
-
-TDI_10km <- focal(elev , 
-                  w = matrix(1, nrow = 5, ncol = 5), 
-                  fun = function(x){
-                    #TDI
-                    (x[13] - min(x))/(max(x)-min(x)) 
-                  })
-
-### 15km
-
-TDI_15km <- focal(elev , 
-                  w = matrix(1, nrow = 7, ncol = 7), 
-                  fun = function(x){
-                    #TDI
-                    (x[25] - min(x))/(max(x)-min(x)) 
-                  })
-
-### 20km
-
-TDI_20km <- focal(elev , 
-                  w = matrix(1, nrow = 9, ncol = 9), 
-                  fun = function(x){
-                    #TDI
-                    (x[41] - min(x))/(max(x)-min(x)) 
-                  })
-
-### 25km
-
-TDI_25km <- focal(elev , 
-                  w = matrix(1, nrow = 11, ncol = 11), 
-                  fun = function(x){
-                    #TDI
-                    (x[61] - min(x))/(max(x)-min(x)) 
-                  })
-
-### 30km
-
-TDI_30km <- focal(elev , 
-                  w = matrix(1, nrow = 13, ncol = 13), 
-                  fun = function(x){
-                    #TDI
-                    (x[85] - min(x))/(max(x)-min(x)) 
-                  })
-
-res_TDI <- TDI_10km + TDI_15km + TDI_20km + TDI_25km + TDI_30km
-
-res_TDI <- crop(res_TDI, extent(zone_gridd))
-res_TDI_resample <- resample(res_TDI, zone_gridd)
-#writeRaster(res_TDI_resample, "/media/buntu/D1AB-BCDE/databases/spatial_predictors/res_TDI_resample.nc")
+# elev = dem_data
+# 
+# ### 10km
+# 
+# # TDI_10km <- focal(elev , 
+# #                   w = matrix(1, nrow = 5, ncol = 5), 
+# #                   fun = function(x){
+# #                     #TDI
+# #                     (x[13] - min(x))/(max(x)-min(x)) 
+# #                   })
+# 
+# TDI_10km <- focal(elev , 
+#                   w = matrix(1, nrow = 11, ncol = 11), 
+#                   fun = function(x){
+#                     #TDI
+#                     (x[11*(11/2 + 0.5) - (11/2 - 0.5)] - min(x))/(max(x)-min(x)) 
+#                   })
+# 
+# ### 15km
+# 
+# # TDI_15km <- focal(elev , 
+# #                   w = matrix(1, nrow = 7, ncol = 7), 
+# #                   fun = function(x){
+# #                     #TDI
+# #                     (x[25] - min(x))/(max(x)-min(x)) 
+# #                   })
+# 
+# TDI_15km <- focal(elev , 
+#                   w = matrix(1, nrow = 21, ncol = 21), 
+#                   fun = function(x){
+#                     #TDI
+#                     (x[21*(21/2 + 0.5) - (21/2 - 0.5)] - min(x))/(max(x)-min(x)) 
+#                   })
+# 
+# ### 20km
+# 
+# # TDI_20km <- focal(elev , 
+# #                   w = matrix(1, nrow = 9, ncol = 9), 
+# #                   fun = function(x){
+# #                     #TDI
+# #                     (x[41] - min(x))/(max(x)-min(x)) 
+# #                   })
+# 
+# TDI_20km <- focal(elev , 
+#                   w = matrix(1, nrow = 41, ncol = 41), 
+#                   fun = function(x){
+#                     #TDI
+#                     (x[41*(41/2 + 0.5) - (41/2 - 0.5)] - min(x))/(max(x)-min(x)) 
+#                   })
+# 
+# ### 25km
+# 
+# # TDI_25km <- focal(elev , 
+# #                   w = matrix(1, nrow = 11, ncol = 11), 
+# #                   fun = function(x){
+# #                     #TDI
+# #                     (x[61] - min(x))/(max(x)-min(x)) 
+# #                   })
+# TDI_25km <- focal(elev , 
+#                   w = matrix(1, nrow = 51, ncol = 51), 
+#                   fun = function(x){
+#                     #TDI
+#                     (x[51*(51/2 + 0.5) - (51/2 - 0.5)] - min(x))/(max(x)-min(x)) 
+#                   })
+# ### 30km
+# 
+# # TDI_30km <- focal(elev ,
+# #                   w = matrix(1, nrow = 13, ncol = 13),
+# #                   fun = function(x){
+# #                     #TDI
+# #                     (x[85] - min(x))/(max(x)-min(x))
+# #                   })
+# 
+# TDI_30km <- focal(elev ,
+#                   w = matrix(1, nrow = 61, ncol = 61),
+#                   fun = function(x){
+#                     #TDI
+#                     (x[61*(61/2 + 0.5) - (61/2 - 0.5)] - min(x))/(max(x)-min(x)) 
+#                   })
+# 
+# res_TDI <- TDI_10km + TDI_15km + TDI_20km + TDI_25km + TDI_30km
+# 
+# res_TDI <- crop(res_TDI, extent(zone_gridd))
+# res_TDI_resample <- resample(res_TDI, zone_gridd)
+# writeRaster(res_TDI_resample, "/media/buntu/D1AB-BCDE/databases/spatial_predictors/res_TDI_resample.nc", overwrite = T)
 res_TDI_resample <- raster("/media/buntu/D1AB-BCDE/databases/spatial_predictors/res_TDI_resample_filled.nc") %>%
   mask(., tn_lst[[1]])
-
 ################## plot 
 
 # shp_peru <- readOGR("/home/buntu/Desktop/serrano_temperature_dataset/Data_Perú_Geografico/Departamentos.shp", "Departamentos")
@@ -214,9 +245,33 @@ res_TDI_resample <- raster("/media/buntu/D1AB-BCDE/databases/spatial_predictors/
 ### saving data 
 rest_cov <- brick(dem_data_resample,Xmap, Ymap, dsea_data_resample,res_TDI_resample)
 names(rest_cov) <- c("Z","X","Y","DS","TDI")
+extent(rest_cov)
+extent(tn_lst)
+### standardized cov?
 
-  save(rest_cov,
+# rest_cov_std <- brick((dem_data_resample - mean(dem_data_resample@data@values, na.rm = T))/sd(dem_data_resample@data@values, na.rm = T) ,
+#                   (Xmap - mean(Xmap@data@values, na.rm = T))/sd(Xmap@data@values, na.rm = T) ,                 
+#                   (Ymap - mean(Ymap@data@values, na.rm = T))/sd(Ymap@data@values, na.rm = T) , 
+#                   (dsea_data_resample - mean(dsea_data_resample@data@values, na.rm = T))/sd(dsea_data_resample@data@values, na.rm = T) , 
+#                   (res_TDI_resample - mean(res_TDI_resample@data@values, na.rm = T))/sd(res_TDI_resample@data@values, na.rm = T))
+# names(rest_cov_std) <- c("Z","X","Y","DS","TDI")
+# 
+# tx_lst_std <- lapply(tx_lst %>% as.list(), function(x) (x - mean(x@data@values, na.rm = T))/sd(x@data@values, na.rm = T)) %>%
+#   brick()
+# 
+# tn_lst_std <- lapply(tn_lst %>% as.list(), function(x) (x - mean(x@data@values, na.rm = T))/sd(x@data@values, na.rm = T)) %>%
+#   brick()
+
+#####
+
+save(rest_cov,
        tx_lst, tn_lst, 
        file = file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","spatial_predictors.RData"))
 
-  
+# rest_cov <- rest_cov_std
+# tx_lst <- tx_lst_std
+# tn_lst <- tn_lst_std
+# 
+# save(rest_cov_std,
+#      tx_lst_std, tn_lst_std, 
+#      file = file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","spatial_std_predictors.RData"))

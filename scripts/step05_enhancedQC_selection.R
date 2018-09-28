@@ -152,7 +152,7 @@ window(raw_temp_TX_5[, "X812"], end = "1980-12-31") <- NA
 raw_temp_TX_5[, "X815"] <- raw_temp_TX_5_6[, "X815"] 
 raw_temp_TX_5[, "X820"] <- raw_temp_TX_5_6[, "X820"] 
 raw_temp_TX_5[, "X822"] <- raw_temp_TX_5_6[, "X822"] 
-#raw_temp_TX_5[, "X830"] <- raw_temp_TX_5_6[, "X830"] 
+raw_temp_TX_5[, "X830"] <- raw_temp_TX_5_6[, "X830"] 
 raw_temp_TX_5[, "X839"] <- raw_temp_TX_5_6[, "X839"] 
 window(raw_temp_TX_5[, "X844"], start = "2001-01-01") <- NA
 raw_temp_TX_5[, "X855"] <- raw_temp_TX_5_6[, "X855"] 
@@ -221,7 +221,7 @@ window(raw_temp_TN_5[, "X539"], start = "2009-01-01", end = "2010-12-31") <- NA
 window(raw_temp_TN_5[, "X540"],  end = "1991-12-31") <- NA
 window(raw_temp_TN_5[, "X548"],  end = "1983-12-31") <- NA
 raw_temp_TN_5[, "X549"] <- raw_temp_TN_5_6[, "X549"] 
-#window(raw_temp_TN_5[, "X549"],  end = "1983-12-31") <- NA
+window(raw_temp_TN_5[, "X549"],  end = "1983-12-31") <- NA
 window(raw_temp_TN_5[, "X590"],  end = "2004-12-31") <- NA
 window(raw_temp_TN_5[, "X604"],  end = "1997-12-31") <- NA
 window(raw_temp_TN_5[, "X605"],  start = "2012-01-01") <- NA
@@ -242,12 +242,14 @@ raw_temp_TN_5[, "X749"] <- raw_temp_TN_5_6[, "X749"]
 raw_temp_TN_5[, "X761"] <- raw_temp_TN_5_6[, "X761"] 
 raw_temp_TN_5[, "X788"] <- raw_temp_TN_5_6[, "X788"] 
 raw_temp_TN_5[, "X793"] <- raw_temp_TN_5_6[, "X793"] 
-#window(raw_temp_TN_5[, "X806"], start = "1993-01-01", end = "1997-12-31") <- NA
+window(raw_temp_TN_5[, "X806"], start = "1993-01-01", end = "1997-12-31") <- NA
 raw_temp_TN_5[, "X812"] <- raw_temp_TN_5_6[, "X812"] 
 raw_temp_TN_5[, "X815"] <- raw_temp_TN_5_6[, "X815"] 
 raw_temp_TN_5[, "X820"] <- raw_temp_TN_5_6[, "X820"] 
 raw_temp_TN_5[, "X822"] <- raw_temp_TN_5_6[, "X822"] 
 raw_temp_TN_5[, "X882"] <- raw_temp_TN_5_6[, "X882"] 
+window(raw_temp_TN_5[, "X882"], start = "2006-01-01", end = "2012-12-31") <- NA
+
 raw_temp_TN_5[, "X889"] <- raw_temp_TN_5_6[, "X889"] 
 raw_temp_TN_5[, "X2412"] <- raw_temp_TN_5_6[, "X2412"] 
 raw_temp_TN_5[, "X4450"] <- raw_temp_TN_5_6[, "X4450"] 
@@ -255,12 +257,13 @@ window(raw_temp_TN_5[, "X7454"], end = "2003-12-31") <- NA
 raw_temp_TN_5[, "X113162"] <- raw_temp_TN_5_6[, "X113162"] 
 raw_temp_TN_5[, "X158301"] <- raw_temp_TN_5_6[, "X158301"] 
 raw_temp_TN_5[, "X0017GHCN"] <- raw_temp_TN_5_6[, "X0017GHCN"]
-
+window(raw_temp_TN_5[, "X846"], start = "2007-01-01", end = "2008-05-31") <- NA
+window(raw_temp_TN_5[, "X846"], start = "2010-01-01", end = "2011-05-31") <- NA
 #crocodiles :(
 window(raw_temp_TN_5[, "X778"], start = "2003-08-01", end = "2014-10-31")[window(raw_temp_TN_5[, "X778"], start = "2003-08-01", end = "2014-10-31") < 0]  <- 
   window(raw_temp_TN_5[, "X778"], start = "2003-08-01", end = "2014-10-31")[window(raw_temp_TN_5[, "X778"], start = "2003-08-01", end = "2014-10-31") < 0] + 4
 window(raw_temp_TN_5[, "X816"], start = "1998-05-01", end = "2011-10-31")[window(raw_temp_TN_5[, "X816"], start = "1998-05-01", end = "2011-10-31") < 0] <- 
-  window(raw_temp_TN_5[, "X816"], start = "1998-05-01", end = "2011-10-31")[window(raw_temp_TN_5[, "X816"], start = "1998-05-01", end = "2011-10-31") < 0] + 4
+  window(raw_temp_TN_5[, "X816"], start = "1998-05-01", end = "2011-10-31")[window(raw_temp_TN_5[, "X816"], start = "1998-05-01", end = "2011-10-31") < 0] + 5
 
 ### second inspection
 
@@ -417,6 +420,7 @@ raw_temp_TX_5[, "X832"][raw_temp_TX_5[, "X832"] < 12] <- NA
 raw_temp_TX_5[, "X877"][raw_temp_TX_5[, "X877"] > 30] <- NA
 window(raw_temp_TX_5[, "X879"], end = "1986-12-31") <- NA
 window(raw_temp_TX_5[, "X880"], start = "1990-01-01",end = "1990-06-30") <- NA
+window(raw_temp_TX_5[, "X832"], start = "1994-01-01",end = "1997-12-31") <- NA
 
 raw_temp_TX_5[, "X0003GHCN"] <- raw_temp_TX_5_or[, "X0003GHCN"]
 window(raw_temp_TX_5[, "X0003GHCN"], end = "1981-12-31") <- NA
@@ -429,6 +433,22 @@ raw_temp_TX_5[, "X749"] <- raw_temp_TX_5_or[, "X749"]
 window(raw_temp_TX_5[, "X749"], start = "1992-01-01", end = "1992-12-31") <- NA
 window(raw_temp_TX_5[, "X749"], start = "1982-01-01", end = "1982-12-31") <- NA
 
+###
+#last adedd
+#plot(raw_temp_TN_5[, "X787"], type = "p", cex = .1)
+#plot(raw_temp_TN_5[, "X786"], type = "p", cex = .1)
+window(raw_temp_TN_5[, "X786"], end = "2006-01-01")[window(raw_temp_TN_5[, "X786"], end = "2006-01-01") < 0] <-
+  window(raw_temp_TN_5[, "X786"], end = "2006-01-01")[window(raw_temp_TN_5[, "X786"], end = "2006-01-01") < 0] + 0.1
+window(raw_temp_TN_5[, "X786"], start = "2006-01-01")[window(raw_temp_TN_5[, "X786"], start = "2006-01-01") < 0] <-
+  window(raw_temp_TN_5[, "X786"], start = "2006-01-01")[window(raw_temp_TN_5[, "X786"], start = "2006-01-01") < 0] + 0.65
+window(raw_temp_TN_5[, "X786"], start = "2005-06-01", end = "2005-09-05") <- NA
+plot(raw_temp_TN_5[, "X786"], type = "p", cex = .1)
+
+
+# plot(raw_temp_TN_5[, "X783"], type = "p", cex = .1)
+# window(raw_temp_TN_5[, "X783"], start = "2000-01-01")[window(raw_temp_TN_5[, "X783"], start = "2000-01-01") < 0] <-
+#   window(raw_temp_TN_5[, "X783"], start = "2000-01-01")[window(raw_temp_TN_5[, "X783"], start = "2000-01-01") < 0] + 2
+# plot(raw_temp_TN_5[, "X783"], type = "p", cex = .1)
 
 
 ###
@@ -516,3 +536,6 @@ raw_temp_TN_5_or[,"X778"] %>% plot(type = "p", cex = .1)
 
 raw_temp_TN_5_or[,"X362"] %>% plot(type = "p", cex = .1)
 raw_temp_TN_6[,"X362"] %>% plot(type = "p", cex = .1)
+
+raw_temp_TN_5_or[,"X783"] %>% plot(type = "p", cex = .1)
+raw_temp_TN_6[,"X783"] %>% plot(type = "p", cex = .1)

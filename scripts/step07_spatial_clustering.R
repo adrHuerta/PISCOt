@@ -18,12 +18,12 @@ ls()
 
 ######
 
-get_nearest_stat(data_xy = raw_spat_St_eqc[, c("XX", "YY", "CC")],
-                 nearest = T)
-
-plot(raw_spat_St_eqc[,"XX"], raw_spat_St_eqc[,"YY"])
-points(raw_spat_St_eqc[match(adr3, raw_spat_St_eqc$CC),][,"XX"],
-       raw_spat_St_eqc[match(adr3, raw_spat_St_eqc$CC),][,"YY"], pch = 4,cex = 5)
+# get_nearest_stat(data_xy = raw_spat_St_eqc[, c("XX", "YY", "CC")],
+#                  nearest = T)
+# 
+# plot(raw_spat_St_eqc[,"XX"], raw_spat_St_eqc[,"YY"])
+# points(raw_spat_St_eqc[match(adr3, raw_spat_St_eqc$CC),][,"XX"],
+#        raw_spat_St_eqc[match(adr3, raw_spat_St_eqc$CC),][,"YY"], pch = 4,cex = 5)
 ######
 
 # is goood elevation data?
@@ -37,7 +37,9 @@ points(raw_spat_St_eqc[match(adr3, raw_spat_St_eqc$CC),][,"XX"],
 # elv_tx <- elv_tx %>% elevation(., key = apikey) %>% .[, 3]
 # elv_tn <- elv_tn %>% elevation(., key = apikey) %>% .[, 3]
 
-elv <- raster("/media/buntu/D1AB-BCDE/databases/spatial_predictors/dem_and_others3/dem.tif")
+elv <- file.path("/media", "buntu", "D1AB-BCDE", "databases", "spatial_predictors","dem_and_others3","GMTED2010_gee.tif") %>% #dem.tif
+  raster()
+names(elv) <- c("dem")
 raster_dem <- as.data.frame(elv,  xy = T)
 raster_dem$dem[raster_dem$dem <= 0] <- NA
 

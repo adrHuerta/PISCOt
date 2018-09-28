@@ -87,7 +87,7 @@ seasonal_pha <- function(database_list = NULL,
     
     res_MW_phomog <- pairwiseSNHT(baseData, 
                                   dat_mat_XY, 
-                                  k = 3, 
+                                  k = 2, 
                                   period = 5,
                                   crit = qchisq(1-0.05/600, df = 1), 
                                   returnStat = F)
@@ -186,7 +186,8 @@ seasonal_phab <- function(database_list = NULL,
   res_seapha <- lapply(database_list, function(j){
     #   for(j in 1:12) {
     #  j = database_list[[j]]
-    data_XY <- j 
+    # 
+    data_XY <- j %>% rev() 
     baseData <- data.frame(time = 1:length(time(data_XY)), coredata(data_XY))
     baseData <- melt(baseData, id.vars = "time", 
                      variable.name = "location",
@@ -196,8 +197,8 @@ seasonal_phab <- function(database_list = NULL,
     
     res_MW_phomog <- pairwiseSNHT(baseData, 
                                   dat_mat_XY, 
-                                  k = 3, 
-                                  period = 5,
+                                  k = dim(dat_mat_XY)[1] - 1, 
+                                  period = 10,
                                   crit = qchisq(1-0.05/600, df = 1), 
                                   returnStat = F)
     
@@ -216,37 +217,111 @@ seasonal_phab <- function(database_list = NULL,
     #  breks_noHM <- breks_noHM  
     #   }
     # return(list(break_inf = breks_noHM, break_corr = res_HM-res_noHM))
-    return(list(break_corr = res_HM-res_noHM))
+    return(list(break_corr = rev(res_HM - res_noHM)))
     
   })
   
   res_v <-  lapply(res_seapha, function(z){
-    months_t <- z[[1]][1] %>% time %>% format("%m")
+    months_t <- z[[1]] %>% time %>% format("%m")
     
-    if ( months_t == "03" ){ 
+    if ( all(months_t == "03") ){ 
       res <- monthlyTS[format(time(monthlyTS), "%m") %in% c("01","02","12")]
-      coredata(res) <- rep(z$break_corr[-length(z$break_corr)], 3)
+      coredata(res) <- rep(z$break_corr[-length(z$break_corr)], each = 3)
       return(res)
         
-    } else if ( months_t == "05" ) {
+    } else if ( all(months_t == "05") ) {
       res <- monthlyTS[format(time(monthlyTS), "%m") %in% c("03","04","05")]
-      coredata(res) <- rep(z$break_corr, 3)
+      coredata(res) <- rep(z$break_corr,each = 3)
       return(res)
 
-    } else if (  months_t == "08"  ) {
+    } else if (  all(months_t == "08")  ) {
       res <- monthlyTS[format(time(monthlyTS), "%m") %in% c("06","07","08")]
-      coredata(res) <- rep(z$break_corr, 3)
+      coredata(res) <- rep(z$break_corr, each =3)
       return(res)
 
     } else {
       res <- monthlyTS[format(time(monthlyTS), "%m") %in% c("09","10","11")]
-      coredata(res) <- rep(z$break_corr, 3)
+      coredata(res) <- rep(z$break_corr, each =3)
       return(res)
         
       }
     
-  })  %>% do.call(rbind, .)
+  })  %>% do.call(rbind, .) 
   
-  return(list(TS_Corrected = res_v + monthlyTS, monthlyFacts = res_v))  
+  return(list(TS_Corrected = monthlyTS + res_v, monthlyFacts = res_v))  
+}
+
+pairwiseSNHT2 <- function(data, dist, k, period, crit=100, returnStat=FALSE,
+                         ...){
+  #data quality checks
+  stopifnot(is(data,"data.frame"))
+  if(is(data, "data.table")){
+    stop("data must be a data.frame, not a data.table")
+  }
+  if(ncol(data)==2){
+    stopifnot(colnames(data) %in% c("data","location"))
+    # Reorder columns
+    data = data[, c("data", "location")]
+  }
+  if(ncol(data)==3){
+    stopifnot(colnames(data) %in% c("data","location","time"))
+    # Reorder columns
+    data = data[, c("data", "location", "time")]
+  }
+  stopifnot(ncol(data) %in% c(2,3))
+  locs = as.character(unique(data$location))
+  stopifnot(rownames(dist) == colnames(dist))
+  stopifnot(all(rownames(dist) %in% locs))
+  stopifnot(all(locs %in% rownames(dist)))
+  stopifnot(k >= 1) #Must have at least one neighbor
+  stopifnot(k <= length(locs)-1) #Can have at most length(locs)-1 neighbor, since self can't be used  
+  stopifnot(diag(dist) == 0)
+  if(any(dist[row(dist) != col(dist)]<=0))
+    stop("Off diagonal elements of dist must be >0")
+  
+  pairs = getPairs(dist, k=k)
+  uniquePairs = getUniquePairs(pairs)
+  
+  #Add times if they don't already exist (just 1:nrow()).
+  if(!"time" %in% colnames(data)){
+    if(length( unique( table( data$location ) ) ) != 1){
+      stop("All locations must have the same number of obs if time is not provided!
+           May need to remove unused levels in data.")
+    }
+    data$order = 1:nrow(data) #ensure original ordering is preserved
+    data = plyr::ddply(data, "location", function(df){
+      df = df[order(df$order),]
+      df$time = 1:nrow(df)
+      return(df)
+    } )
+    data$order = NULL
+    }
+  
+  #Restructure data
+  data = reshape2::dcast(data, formula = time ~ location, value.var = "data")
+  diffs = data.frame(time = data$time)
+  for(i in 1:nrow(uniquePairs)){
+    diffs = cbind(diffs, data[,uniquePairs[i,1]] - data[,uniquePairs[i,2]])
+    colnames(diffs)[ncol(diffs)] = paste0(uniquePairs[i,1],"-",uniquePairs[i,2])
+  }
+  
+  #Compute snht statistics
+  statistics = apply(diffs[, -1, drop=FALSE], 2, snht, period=period, time=diffs[,1])
+  avgDiff = do.call("cbind", lapply(statistics, function(x) x$rightMean-x$leftMean ) )
+  statistics = do.call("cbind", lapply(statistics, function(x) x$score))
+  if(returnStat)
+    return(statistics)
+  
+  candidate = createCandidateMatrix(data, statistics = statistics,
+                                    pairs = pairs, crit = crit)
+  out = unconfoundCandidateMatrix(candidate = candidate, pairs = pairs,
+                                  statistics = statistics, data = data, period = period, avgDiff = avgDiff)
+  
+  out$data = reshape2::melt(data = out$data, id.vars = "time")
+  rownames(out$data) = NULL
+  colnames(out$data)[colnames(out$data) == "value"] = "data"
+  colnames(out$data)[colnames(out$data) == "variable"] = "location"
+  out$data = out$data[,c("data", "location", "time")]
+  return(out)
 }
   

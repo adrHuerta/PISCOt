@@ -161,6 +161,7 @@ Ddata_tn <- tn_const_filled
 
 
 isTRUE(identical(Ddstats_s,Mdstats_s))
+all(Ddstats_s$CC == Mdstats_s$CC)
 stats_s <- Mdstats_s
           
 ###################

@@ -35,7 +35,7 @@ qcstats_tn <- qc_stat_VS_tn
 
 length_tx <- data.frame(n = qcdata_tx %>%
                           apply(., 2, function(x) filter_qc(xts(x, time(qcdata_tx)),  n_months = 10, monthlyTS =T) ) )  %>%
-  mutate(grupo = ifelse(n >= 20, 1, 2) ) %>%
+  mutate(grupo = ifelse(n >= 25, 1, 2) ) %>%
   cbind(., qcstats_tx)
 
 ggplot() + 
@@ -97,24 +97,25 @@ qcdata_model_tx <- cbind(data_hm_model1, data_hm_model2); qcdata_model_tx <- qcd
 # for(xs in colnames(qcdata_tx)){
 # 
 #  # jpeg(paste("/media/buntu/D1AB-BCDE/databases/results/qc/infilling/tx/",xs, "_",".jpg", sep = ""), width = 700, height = 550)
-#   plot(cbind(qcdata_tx[,xs], Mera_tx_CS_VS[,xs]) %>% zoo(), type = "l", cex = 0.1)
+#   plot(cbind(qcdata_tx[,xs], Mera_tx_CS_VS[,xs], qcdata_model_tx[,xs]) %>% zoo(), type = "l", cex = 0.1)
 #   Sys.sleep(2)
 # #  dev.off()
 # 
 # }
 
-# qcdata_tx[, "X139"] <- qcdata_model_tx[, "X139"]
-# qcdata_tx[, "X211"] <- qcdata_model_tx[, "X211"]
-# qcdata_tx[, "X219"] <- qcdata_model_tx[, "X219"]
-# qcdata_tx[, "X236"] <- qcdata_model_tx[, "X236"]
-# qcdata_tx[, "X250"] <- qcdata_model_tx[, "X250"]
-# qcdata_tx[, "X272"] <- qcdata_model_tx[, "X272"]
-# qcdata_tx[, "X282"] <- qcdata_model_tx[, "X282"]
-# qcdata_tx[, "X302"] <- qcdata_model_tx[, "X302"]
-# qcdata_tx[, "X340"] <- qcdata_model_tx[, "X340"]
-# qcdata_tx[, "X371"] <- qcdata_model_tx[, "X371"]
-# qcdata_tx[, "X378"] <- qcdata_model_tx[, "X378"]
-# qcdata_tx[, "X443"] <- qcdata_model_tx[, "X443"]
+qcdata_tx[, "X139"] <- qcdata_model_tx[, "X139"]
+qcdata_tx[, "X211"] <- qcdata_model_tx[, "X211"]
+qcdata_tx[, "X219"] <- qcdata_model_tx[, "X219"]
+qcdata_tx[, "X236"] <- qcdata_model_tx[, "X236"]
+qcdata_tx[, "X250"] <- qcdata_model_tx[, "X250"]
+qcdata_tx[, "X272"] <- qcdata_model_tx[, "X272"]
+qcdata_tx[, "X282"] <- qcdata_model_tx[, "X282"]
+qcdata_tx[, "X302"] <- qcdata_model_tx[, "X302"] #outlier
+qcdata_tx[, "X340"] <- qcdata_model_tx[, "X340"] #outlier
+qcdata_tx[, "X371"] <- qcdata_model_tx[, "X371"]
+qcdata_tx[, "X378"] <- qcdata_model_tx[, "X378"]
+qcdata_tx[, "X443"] <- qcdata_model_tx[, "X443"]
+qcdata_tx[, "X805"] <- qcdata_model_tx[, "X805"]
 
 #############################
 ########### TN
@@ -122,7 +123,7 @@ qcdata_model_tx <- cbind(data_hm_model1, data_hm_model2); qcdata_model_tx <- qcd
 
 length_tn <- data.frame(n = qcdata_tn %>%
                           apply(., 2, function(x) filter_qc(xts(x, time(qcdata_tn)),  monthlyTS = T, n_months = 10) ))  %>%
-  mutate(grupo = ifelse(n >= 20, 1, 2) ) %>%
+  mutate(grupo = ifelse(n >= 25, 1, 2) ) %>%
   cbind(., qcstats_tn)
 
 ggplot() + 
@@ -153,7 +154,6 @@ length_tn[, c("CC", "grupo")] %>%
   xlab("") + ylab("Cantidad de datos")
 
 
-View(length_tn)
 
 nnames <- subset(length_tn, grupo == 1 & VSS == 1)[, c("XX", "YY", "CC")]$CC %>% as.character()
 del_nnames <- subset(length_tn, grupo == 2 & VSS == 1)[, c("XX", "YY", "CC")]$CC %>% as.character()
@@ -183,17 +183,23 @@ qcdata_tn[, colnames(data_hm)] <- data_hm
 qcdata_tn <- qcdata_tn[, subset(length_tn, VSS == 1) %>% .$CC ]
 qcdata_model_tn <- cbind(data_hm_model1, data_hm_model2); qcdata_model_tn <- qcdata_model_tn[, subset(length_tn, VSS == 1) %>% .$CC ]
 # 
-# for(xs in 1:dim(qcdata_tn)[2]){
+# for(xs in 95:dim(qcdata_tn)[2]){
 #   #jpeg(paste("/media/buntu/D1AB-BCDE/databases/results/qc/infilling/tn/",xs, "_",".jpg", sep = ""), width = 700, height = 550)
 #   plot(cbind(qcdata_tn[,xs], Mera_tn_CS_VS[,xs], qcdata_model_tn[,xs]) %>% zoo(), type = "l", cex = 0.3)
-#   Sys.sleep(2)
+#   Sys.sleep(1)
 #   #dev.off()
 # }
 
+
 qcdata_tn[, "X176"] <- qcdata_model_tn[, "X176"]
+#qcdata_tn[, "X253"] <- qcdata_model_tn[, "X253"] #outlier
 qcdata_tn[, "X308"] <- qcdata_model_tn[, "X308"]
 qcdata_tn[, "X319"] <- qcdata_model_tn[, "X319"]
+qcdata_tn[, "X373"] <- qcdata_model_tn[, "X373"]
+qcdata_tn[, "X387"] <- qcdata_model_tn[, "X387"]
+qcdata_tn[, "X393"] <- qcdata_model_tn[, "X393"]
 qcdata_tn[, "X554"] <- qcdata_model_tn[, "X554"]
+qcdata_tn[, "X823"] <- qcdata_model_tn[, "X823"]
 
 ###### Saving data
 ######

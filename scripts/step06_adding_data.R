@@ -65,7 +65,10 @@ for(i in match_tx)
 
 raw_temp_TX_7[, "X208"] <- all_data_tx[, "X208"]
 raw_temp_TX_7[, "X370"] <- all_data_tx[, "X370"]
-raw_temp_TX_7[, "X640"] <- all_data_tx[, "X640"]
+#raw_temp_TX_7[, "X640"] <- all_data_tx[, "X640"]
+window(raw_temp_TX_7[, "X0024GHCN"], end = "2006-01-01") <- window(raw_temp_TX_7[, "X0024GHCN"], end = "2006-01-01") - 1.25
+
+#no crocodiles in TX from original data!
 
 ##################
 
@@ -114,16 +117,50 @@ for(i in match_tn)
   }
 }
 
+#some correction that were done before and should be done here to
+
 raw_temp_TN_7[, "X208"] <- all_data_tn[, "X208"]
 raw_temp_TN_7[, "X239"] <- all_data_tn[, "X239"]
+
+all_data_tn[, "X882"][time(all_data_tn[, "X882"][is.na(raw_temp_TN_7[, "X882"])])] <- NA
 raw_temp_TN_7[, "X882"] <- all_data_tn[, "X882"]
+
+
+all_data_tn[, "X783"][time(all_data_tn[, "X783"][is.na(raw_temp_TN_7[, "X783"])])] <- NA
 raw_temp_TN_7[, "X783"] <- all_data_tn[, "X783"]
+
+plot(raw_temp_TN_7[, "X783"], type = "p", cex = .1)
+window(raw_temp_TN_7[, "X783"], start = "2000-01-01")[window(raw_temp_TN_7[, "X783"], start = "2000-01-01") < 0] <-
+  window(raw_temp_TN_7[, "X783"], start = "2000-01-01")[window(raw_temp_TN_7[, "X783"], start = "2000-01-01") < 0] + 2
+window(raw_temp_TN_7[, "X783"], start = "1983-01-01", end = "1984-12-31")[window(raw_temp_TN_7[, "X783"], start = "1983-01-01", end = "1984-12-31") < 0] <-
+  window(raw_temp_TN_7[, "X783"], start = "1983-01-01", end = "1984-12-31")[window(raw_temp_TN_7[, "X783"], start = "1983-01-01", end = "1984-12-31") < 0] + 1
+
+plot(raw_temp_TN_7[, "X783"], type = "p", cex = .1)
+
+
+plot(raw_temp_TN_7[, "X786"], type = "p", cex = .1)
+raw_temp_TN_7[, "X786"][ raw_temp_TN_7[, "X786"] < -12] <-NA
+window(raw_temp_TN_7[, "X786"], start = "2015-01-01")[window(raw_temp_TN_7[, "X786"], start = "2015-01-01") < 0] <-
+  window(raw_temp_TN_7[, "X786"], start = "2015-01-01")[window(raw_temp_TN_7[, "X786"], start = "2015-01-01") < 0] + 0.65
+plot(raw_temp_TN_7[, "X786"], type = "p", cex = .1)
+
+window(raw_temp_TN_7[, "X787"], end = "1988-12-31") <-  NA
+window(raw_temp_TN_7[, "X806"], end = "1997-12-31") <-  window(raw_temp_TN_7[, "X806"], end = "1997-12-31") - 0.5
+
+all_data_tn[, "X549"][time(all_data_tn[, "X549"][is.na(raw_temp_TN_7[, "X549"])])] <- NA
 raw_temp_TN_7[, "X549"] <- all_data_tn[, "X549"]
+
+all_data_tn[, "X310"][time(all_data_tn[, "X310"][is.na(all_data_tn[, "X310"])])] <- NA
 raw_temp_TN_7[, "X310"] <- all_data_tn[, "X310"]
+
 raw_temp_TN_7[, "X727"] <- all_data_tn[, "X727"]
+
 window(raw_temp_TN_7[, "X310"], start = "1992-01-01", end = "1994-12-31") <- NA
 window(raw_temp_TN_7[, "X698"], start = "2016-01-01") <- all_data_tn[, "X698"] %>% window(start = "2016-01-01")
+raw_temp_TN_7[, "X698"][raw_temp_TN_7[, "X698"] < 4] <- NA
 
+#cocodriles
+#in tn there are a lot cocodriles, however the only two after 2015 were corrected!
 
 ####################
 
@@ -176,6 +213,7 @@ raw_temp_TX_7 <- raw_temp_TX_7[, match_TX_TN]
 raw_temp_TN_7 <- raw_temp_TN_7[, match_TX_TN]
 raw_temp_DTR_7 <- raw_temp_TX_7 - raw_temp_TN_7
 
+
 ### deleting (after spatial interpolation)
 
 raw_spat_St_eqc <- raw_spat_St_eqc[ -match("X790", raw_spat_St_eqc$CC),]
@@ -191,3 +229,4 @@ save(raw_temp_TN_7,
      raw_temp_DTR_7,
      raw_spat_St_eqc,
      file = file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","step05_QCDATA_04.RData"))
+

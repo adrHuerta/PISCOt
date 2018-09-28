@@ -36,17 +36,17 @@ qcstat_HM <- stats_s %>%
   .[, c("XX","YY","CC","GGR")] %>%
   get_nearest_stat(nearest = T) %>%
   lapply(., function(x){ 
-     # r_r <- x[1,5]
-     # colnames(x) <- c("XX","YY","NN","GGR","D")
-     # res_R <- subset(x, GGR == r_r) %>% .[1:5, ] %>% .[complete.cases(.),]
-     # res_noR <- subset(x, GGR != r_r)
-     # 
-     # if( dim(res_R)[1] < 5 ){
-     #   res_R <- rbind(res_R, res_noR)[1:5, ]
-     # }
-     # 
-     # return(res_R)
-     x[1:5, ] 
+    r_r <- x[1,4]
+    colnames(x) <- c("XX","YY","NN","GGR","D")
+    res_R <- subset(x, GGR == r_r) %>% .[1:5, ] %>% .[complete.cases(.),]
+    res_noR <- subset(x, GGR != r_r)
+    
+    if( dim(res_R)[1] < 5 ){
+      res_R <- rbind(res_R, res_noR)[1:5, ]
+    }
+    
+    return(res_R)
+    #x[1:4, ] 
      }) %>%
   lapply(., function(x) get_dist_matrix(data_XY = x[, c("XX", "YY", "NN")]))
 
@@ -57,7 +57,7 @@ qcstat_HM <- stats_s %>%
 daily_TXHOMGE <- list()
 monthly_TXHOMGE <- list()
 TXbreaks_monthly_values <- list()
-
+#z = 174
 for(z in 1:length(qcstat_HM))
 {
   
@@ -100,11 +100,11 @@ for(z in 1:length(qcstat_HM))
   # plot(cbind(monthlyTEMP, resM_monhtly$TS_Corrected, resM_seasonal$TS_Corrected) %>% zoo, 
   #      plot.type = "single", lwd = c(1,2,3), col = c(1,2,3))
   
-  plot(resM$monthlyFacts)
+ # plot(resM$monthlyFacts)
   resD <- TOdailyHomg(dailyTS = dailytTEMP,
                       monthlyFacts = resM$monthlyFacts )
 
-  plot(cbind(resM$TS_Corrected, monthlyTEMP) %>% zoo, col = c(1,2), lwd = 3, plot.type = "single")
+  # plot(cbind(resM$TS_Corrected, monthlyTEMP) %>% zoo, main =  colnames(distSize)[1], col = c(1,2), lwd = 3, plot.type = "single")
   
   daily_TXHOMGE[[z]] <- resD$TS_Corrected
   monthly_TXHOMGE[[z]] <- resM$TS_Corrected
@@ -146,7 +146,7 @@ for(z in 1:length(qcstat_HM))
   resD <- TOdailyHomg(dailyTS = dailytTEMP,
                       monthlyFacts = resM$monthlyFacts )
   
-  plot(cbind(resM$TS_Corrected, monthlyTEMP) %>% zoo, col = c(1,2), lwd = 3, plot.type = "single")
+  # plot(cbind(resM$TS_Corrected, monthlyTEMP) %>% zoo, main =  colnames(distSize)[1], col = c(1,2), lwd = 3, plot.type = "single")
   
   daily_TXHOMGE2[[z]] <- resD$TS_Corrected
   monthly_TXHOMGE2[[z]] <- resM$TS_Corrected
@@ -166,17 +166,17 @@ qcstat_HM <- stats_s %>%
   .[, c("XX","YY","CC","GGR")] %>%
   get_nearest_stat(nearest = T) %>%
   lapply(., function(x){ 
-    # r_r <- x[1,4]
-    # colnames(x) <- c("XX","YY","NN","GGR","D")
-    # res_R <- subset(x, GGR == r_r) %>% .[1:5, ] %>% .[complete.cases(.),]
-    # res_noR <- subset(x, GGR != r_r)
-    # 
-    # if( dim(res_R)[1] < 5 ){
-    #   res_R <- rbind(res_R, res_noR)[1:5, ]
-    # }
-    # 
-    # return(res_R)
-    x[1:5, ] 
+    r_r <- x[1,4]
+    colnames(x) <- c("XX","YY","NN","GGR","D")
+    res_R <- subset(x, GGR == r_r) %>% .[1:5, ] %>% .[complete.cases(.),]
+    res_noR <- subset(x, GGR != r_r)
+    
+    if( dim(res_R)[1] < 5 ){
+      res_R <- rbind(res_R, res_noR)[1:5, ]
+    }
+    
+    return(res_R)
+    #x[1:4, ] 
   }) %>%
   lapply(., function(x) get_dist_matrix(data_XY = x[, c("XX", "YY", "NN")]))
 
@@ -212,7 +212,7 @@ for(z in 1:length(qcstat_HM))
   resD <- TOdailyHomg(dailyTS = dailytTEMP,
                       monthlyFacts = resM$monthlyFacts )
   
-  plot(cbind(resM$TS_Corrected, monthlyTEMP) %>% zoo, col = c(1,2), lwd = 3, plot.type = "single")
+  # plot(cbind(resM$TS_Corrected, monthlyTEMP, resM$monthlyFacts) %>% zoo, main =  colnames(distSize)[1], col = c(1,2), lwd = 3, plot.type = "multiple")
   
   daily_TNHOMGE[[z]] <- resD$TS_Corrected
   monthly_TNHOMGE[[z]] <- resM$TS_Corrected
@@ -256,7 +256,7 @@ for(z in 1:length(qcstat_HM))
   resD <- TOdailyHomg(dailyTS = dailytTEMP,
                       monthlyFacts = resM$monthlyFacts )
   
-  plot(cbind(resM$TS_Corrected, monthlyTEMP) %>% zoo, col = c(1,2), lwd = 3, plot.type = "single")
+  # plot(cbind(resM$TS_Corrected, monthlyTEMP, resM$monthlyFacts) %>% zoo, main =  colnames(distSize)[1], col = c(1,2), lwd = 3, plot.type = "multiple")
   
   daily_TNHOMGE2[[z]] <- resD$TS_Corrected
   monthly_TNHOMGE2[[z]] <- resM$TS_Corrected

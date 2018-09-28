@@ -37,6 +37,7 @@ regKriging <- function(from_get_variables = NULL,
   coeff_model <- summary(lineral_model)$coefficients[,1]
   obs_data$Residuals <- lineral_model$residuals
   
+  
   if( is.numeric(delR)) {
     
     obs_data$Residuals[obs_data$Residuals > delR ] <- delR 
@@ -61,8 +62,7 @@ regKriging <- function(from_get_variables = NULL,
   projection(obs_data) <- NA
   
   variogram = autofitVariogram(Residuals ~ 1, Residuals_df, 
-                               fix.values = c(0, NA, NA),
-                               cressie = T, miscFitOptions = list(merge.small.bins = T,min.np.bin = 30))
+                               fix.values = c(0, NA, NA))
   
   #.2 kriging 
   
@@ -87,6 +87,90 @@ regKriging <- function(from_get_variables = NULL,
               final_map_sd = residual_var))
 }
 
+regIDW <- function(from_get_variables = NULL,
+                       delR = NULL)
+{
+  
+  #regression 
+  
+  cov_data <- from_get_variables$cov_data
+  obs_data <- from_get_variables$obs_data
+  formula_lm <- from_get_variables$formula_lm
+  
+  p_cov <- raster::extract(cov_data, obs_data, cellnumber = F, sp = T)
+  lineral_model <- lm(formula_lm, p_cov)
+  coeff_model <- summary(lineral_model)$coefficients[,1]
+  obs_data$Residuals <- lineral_model$residuals
+  
+
+  ###
+  
+  if( is.numeric(delR)) {
+    
+    obs_data$Residuals[obs_data$Residuals > delR ] <- delR 
+    obs_data$Residuals[obs_data$Residuals < -delR ] <- -delR 
+    
+  }
+  
+  cov_data_model <- coeff_model[1] + sum(cov_data*coeff_model[-1])
+  #spplot(cov_data_model)
+  
+  #residual kriging 
+  #.0 grid data
+  
+  point <- rasterToPoints(cov_data_model) %>% data.frame
+  coordinates(point) <- ~x + y
+  projection(point) <- projection(cov_data_model)
+  
+  #.1 variograms
+  
+  # Residuals_df <- obs_data %>% as.data.frame()
+  # coordinates(Residuals_df) =~ XX+YY
+  # projection(obs_data) <- NA
+  # 
+  # ################33
+  # 
+  # Residuals_adr <- as.data.frame(Residuals_df, xy = T)
+  # tps <- fields::Tps(Residuals_adr[,c("XX","YY")], Residuals_adr[,"Residuals"])
+  # p <- raster(rev_cov_o)
+  # p <- interpolate(p, tps) #%>%  mask(., cov_data_model)
+  
+  ################
+  
+  # variogram = autofitVariogram(Residuals ~ 1, Residuals_df,
+  #                              fix.values = c(0, NA, NA))
+  # 
+  # #.2 kriging 
+  # 
+  # residual_kriged <- krige(Residuals ~ 1, obs_data, point, model = variogram$var_model)
+  # residual_val <- as(residual_kriged[1],"SpatialPixelsDataFrame")
+  # gridded(residual_val) <- TRUE
+  # residual_val <- raster(residual_val)
+  # residual_var <- as(residual_kriged[2],"SpatialPixelsDataFrame")
+  # gridded(residual_var) <- TRUE
+  # residual_var <- raster(residual_var)
+  
+  # outputs 
+  
+  idwError <- idw(Residuals ~ 1, obs_data, point, idp = 2)
+  idwError <- idwError["var1.pred"]
+  gridded(idwError) <- TRUE
+  mapa <- raster(idwError)
+  
+  # outputs 
+  projection(cov_data_model) <- projection(cov_data_model)
+  cov_data_model <- crop(cov_data_model, mapa)
+  final_map <- mapa + cov_data_model
+  
+
+  return(list(lineral_model = lineral_model, 
+              cov_data_model = cov_data_model, 
+            #  variogram = variogram,
+              final_map = final_map
+         #     final_map_sd = residual_var)
+         ))
+
+}
 
 get_variables2 <- function(CLIM_D = NULL,  #brick
                            ALL_STATICS_VAR = NULL, #brick
@@ -152,8 +236,7 @@ regKriging2 <- function(from_get_variables = NULL,
   projection(obs_data) <- NA
   
   variogram = autofitVariogram(Residuals ~ 1, Residuals_df, 
-                               fix.values = c(0, NA, NA),
-                               cressie = T, miscFitOptions = list(merge.small.bins = T,min.np.bin = 30))
+                               fix.values = c(0, NA, NA))
   
   
   #variogram too sensible!
@@ -193,12 +276,13 @@ regKriging3 <- function(from_get_variables = NULL,
   
   cov_data <- from_get_variables$cov_data
   obs_data <- from_get_variables$obs_data
-  formula_lm <- from_get_variables$formula_lm
+  formula_lm <- To ~ CT#from_get_variables$formula_lm
   
   p_cov <- raster::extract(cov_data, obs_data, cellnumber = F, sp = T)
   lineral_model <- lm(formula_lm, p_cov)
   coeff_model <- summary(lineral_model)$coefficients[,1]
   obs_data$Residuals <- lineral_model$residuals
+  obs_data$TDI <- p_cov$TDI
   #delR can not be to low!
   if( is.numeric(delR)) {
     
@@ -207,7 +291,7 @@ regKriging3 <- function(from_get_variables = NULL,
     
   }
   
-  cov_data_model <- coeff_model[1] + (cov_data*coeff_model[-1])#sum(cov_data*coeff_model[-1])
+  cov_data_model <- coeff_model[1] + (cov_data$CT*coeff_model[-1])#sum(cov_data*coeff_model[-1])
   #spplot(cov_data_model)
   
   #residual kriging 
@@ -244,10 +328,10 @@ regKriging3 <- function(from_get_variables = NULL,
   ################33
   
   Residuals_adr <- as.data.frame(Residuals_df, xy = T)
-  tps <- fields::Tps(Residuals_adr[,c("XX","YY")], Residuals_adr[,"Residuals"])
-  p <- raster(cov_data_model)
-  p <- interpolate(p, tps) #%>%  mask(., cov_data_model)
-  
+  tps <- fields::Tps(Residuals_adr[,c("XX","YY","TDI")], Residuals_adr[,"Residuals"])
+  p <- cov_data[[2]]
+  p <- interpolate(p, tps,  xyOnly = F) #%>%  mask(., cov_data_model)
+  plot(extract(p, obs_data), Residuals_adr$Residuals, xlim = c(-2,2), ylim = c(-2,2))
   ################
   
   #.2 kriging 
@@ -287,3 +371,201 @@ regKriging3 <- function(from_get_variables = NULL,
          )
 }
 
+regGWRKriging <- function(from_get_variables = NULL,
+                          delR = NULL)
+{
+  
+  #GWR 
+
+  
+  cov_data <- from_get_variables$cov_data
+  obs_data <- from_get_variables$obs_data
+  formula_lm <- from_get_variables$formula_lm
+  
+  p_cov <- raster::extract(cov_data, obs_data, cellnumber = F, sp = T)
+  
+  bw <- GWmodel::bw.gwr(formula_lm, data = p_cov, approach = "AICc", kernel = "bisquare", adaptive = TRUE)
+  #bw <- spgwr::gwr.sel(formula_lm, data = p_cov, adapt = T, method = "aic")
+  newpts <- rasterToPoints(raster(cov_data))
+  #gwr_model <- spgwr::gwr(formula_lm, data = p_cov, adapt = bw, fit.points = newpts[, 1:2])
+  gwr_model <- GWmodel::gwr.basic(formula_lm, data = p_cov, bw = bw,  kernel = "bisquare", adaptive = TRUE,  regression.points = newpts)
+  
+  #GWR coeff
+  
+  coef_GWR <- cov_data %>% mask(., cov_data)
+  coef_GWR@data@values[, names(cov_data)] <- gwr_model$SDF@data[, names(cov_data)] %>% data.matrix()
+  coef_GWR <- coef_GWR %>% mask(., cov_data[[1]])
+  
+  coef_GWR_intercept <- cov_data[[1]]
+  names(coef_GWR_intercept) <- "Int"
+  #coef_GWR_intercept@data@values <-  gwr_model$SDF$`(Intercept)`
+  coef_GWR_intercept@data@values <-  gwr_model$SDF$`Intercept`
+  coef_GWR_intercept <- coef_GWR_intercept %>% mask(., cov_data[[1]])
+  
+  cov_data_model <- coef_GWR_intercept + sum(coef_GWR*cov_data)
+  
+  #GWR residuals
+  obs_data <- raster::extract(cov_data_model, obs_data, cellnumber = F, sp = T)
+  obs_data$Residuals <- obs_data$To - obs_data$layer
+
+    ###
+  
+  if( is.numeric(delR)) {
+    
+    obs_data$Residuals[obs_data$Residuals > delR ] <- delR 
+    obs_data$Residuals[obs_data$Residuals < -delR ] <- -delR 
+    
+  }
+  
+  #spplot(cov_data_model)
+  
+  #residual kriging 
+  #.0 grid data
+  
+  point <- rasterToPoints(cov_data_model) %>% data.frame
+  coordinates(point) <- ~x + y
+  projection(point) <- NA
+  
+  #.1 variograms
+  
+  Residuals_df <- obs_data %>% as.data.frame()
+  coordinates(Residuals_df) =~ XX+YY
+  projection(obs_data) <- NA
+  
+  ################33
+  
+  # Residuals_adr <- as.data.frame(Residuals_df, xy = T)
+  # tps <- fields::Tps(Residuals_adr[,c("XX","YY")], Residuals_adr[,"Residuals"])
+  # p <- raster(cov_data_model)
+  # p <- interpolate(p, tps) %>%  mask(., cov_data_model)
+  
+  ################
+  
+  variogram = autofitVariogram(Residuals ~ 1, Residuals_df,
+                               fix.values = c(NA, NA, NA), miscFitOptions = list(merge.small.bins = T, 
+                                                                                 min.np.bin = 30))
+  
+  #.2 kriging 
+  
+  residual_kriged <- krige(Residuals ~ 1, obs_data, point, model = variogram$var_model)
+  residual_val <- as(residual_kriged[1],"SpatialPixelsDataFrame")
+  gridded(residual_val) <- TRUE
+  residual_val <- raster(residual_val) 
+  residual_var <- as(residual_kriged[2],"SpatialPixelsDataFrame")
+  gridded(residual_var) <- TRUE
+  residual_var <- raster(residual_var)
+  
+  # outputs 
+  projection(residual_val) <- projection(residual_val)
+  cov_data_model <- crop(cov_data_model, residual_val)
+  final_map <- residual_val + cov_data_model
+  
+  return(list(lineral_model = gwr_model, 
+              cov_data_model = cov_data_model, 
+              cov_pure = coef_GWR,
+              cov_int_pure = coef_GWR_intercept,
+              final_map = final_map
+              #     final_map_sd = residual_var)
+  ))
+  
+}
+
+regGWRIDW <- function(from_get_variables = NULL,
+                   delR = NULL)
+{
+  
+  #GWR 
+  
+  
+  cov_data <- from_get_variables$cov_data
+  obs_data <- from_get_variables$obs_data
+  formula_lm <- from_get_variables$formula_lm
+  
+  p_cov <- raster::extract(cov_data, obs_data, cellnumber = F, sp = T)
+  
+  bw <- spgwr::gwr.sel(formula_lm, data = p_cov)
+  newpts <- rasterToPoints(raster(cov_data))
+  gwr_model <- spgwr::gwr(formula_lm, data = p_cov, bandwidth = bw, fit.points = newpts[, 1:2])
+  
+  #GWR coeff
+  
+  coef_GWR <- cov_data %>% mask(., cov_data)
+  coef_GWR@data@values[, names(cov_data)] <- gwr_model$SDF@data[, names(cov_data)] %>% data.matrix()
+  coef_GWR <- coef_GWR %>% mask(., cov_data[[1]])
+  
+  coef_GWR_intercept <- cov_data[[1]]
+  names(coef_GWR_intercept) <- "Int"
+  coef_GWR_intercept@data@values <-  gwr_model$SDF$`(Intercept)`
+  coef_GWR_intercept <- coef_GWR_intercept %>% mask(., cov_data[[1]])
+  
+  cov_data_model <- coef_GWR_intercept + sum(coef_GWR*cov_data)
+  
+  #GWR residuals
+  obs_data <- raster::extract(cov_data_model, obs_data, cellnumber = F, sp = T)
+  obs_data$Residuals <- obs_data$To - obs_data$layer
+  
+  ###
+  
+  if( is.numeric(delR)) {
+    
+    obs_data$Residuals[obs_data$Residuals > delR ] <- delR 
+    obs_data$Residuals[obs_data$Residuals < -delR ] <- -delR 
+    
+  }
+  
+  #spplot(cov_data_model)
+  
+  #residual kriging 
+  #.0 grid data
+  
+  point <- rasterToPoints(cov_data_model) %>% data.frame
+  coordinates(point) <- ~x + y
+  projection(point) <- projection(cov_data_model)
+  
+  #.1 variograms
+  
+  # Residuals_df <- obs_data %>% as.data.frame()
+  # coordinates(Residuals_df) =~ XX+YY
+  # projection(obs_data) <- NA
+
+  ################33
+  
+  # Residuals_adr <- as.data.frame(Residuals_df, xy = T)
+  # tps <- fields::Tps(Residuals_adr[,c("XX","YY")], Residuals_adr[,"Residuals"])
+  # p <- raster(cov_data_model)
+  # p <- interpolate(p, tps) %>%  mask(., cov_data_model)
+  
+  ################
+  
+  # variogram = autofitVariogram(Residuals ~ 1, Residuals_df,
+  #                              fix.values = c(0, NA, NA),
+  #                              cressie = T)
+  
+  # #.2 kriging 
+  # 
+  # residual_kriged <- krige(Residuals ~ 1, obs_data, point, model = variogram$var_model)
+  # residual_val <- as(residual_kriged[1],"SpatialPixelsDataFrame")
+  # gridded(residual_val) <- TRUE
+  # residual_val <- raster(residual_val) 
+  # residual_var <- as(residual_kriged[2],"SpatialPixelsDataFrame")
+  # gridded(residual_var) <- TRUE
+  # residual_var <- raster(residual_var)
+  
+  idwError <- idw(Residuals ~ 1, obs_data, point, idp = 2)
+  idwError <- idwError["var1.pred"]
+  gridded(idwError) <- TRUE
+  mapa <- raster(idwError)
+  
+  # outputs 
+  projection(cov_data_model) <- projection(cov_data_model)
+  cov_data_model <- crop(cov_data_model, mapa)
+  final_map <- mapa + cov_data_model
+  
+  return(list(lineral_model = gwr_model, 
+              cov_data_model = cov_data_model, 
+              #  variogram = variogram,
+              final_map = final_map
+              #     final_map_sd = residual_var)
+  ))
+  
+}

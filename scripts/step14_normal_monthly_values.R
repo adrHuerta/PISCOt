@@ -19,7 +19,7 @@ source('./functions/quality_control_temp.R')
 
 ###
 
-  load(file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","step10_MHDATA_06.RData"))
+  load(file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","step10_MHCDATA_06.RData"))
   load(file.path("/media","buntu","D1AB-BCDE","databases","workflow_databases","spatial_predictors.RData"))
   ls()
 
@@ -61,6 +61,8 @@ source('./functions/quality_control_temp.R')
         new_ts$CC[1] <- paste(stat_to_del_p, collapse = "")
         new_ts$XX[1] <- mean(new_ts$XX)
         new_ts$YY[1] <- mean(new_ts$YY)
+        new_ts$n_mean[1] <- mean(new_ts$n_mean)
+        
         data_set_res <- rbind(data_set_res, new_ts[1,])
       }
       
@@ -69,18 +71,18 @@ source('./functions/quality_control_temp.R')
     
   }
   
-#### reducing local temperature gradients
+#### reducing huge local temperature gradients
   
   #first iteration
   
   all_points0 <- get_nearest_stat(data_xy = HM_stats[, c("XX", "YY", "CC")],
                               nearest = T) %>%
-    lapply(., function(y) subset(y, D < 11)) %>%
+    lapply(., function(y) subset(y, D < 11)) %>% #distance between stations
     .[lapply(., function(y) dim(y)[1]) != 1] 
   
   stats_all_points0 <- lapply(all_points0, function(z) z$NN)
   res_stats_all_points0 <- NULL
-    for(i in 1:26){
+    for(i in 1:length(stats_all_points0)){
       res_stats_all_points0[[i]]  <- lapply(stats_all_points0, function(x) setequal(x, stats_all_points0[[i]])) %>%
     .[. == T] 
   stats_all_points0[names(res_stats_all_points0)] <- NULL
@@ -115,53 +117,53 @@ source('./functions/quality_control_temp.R')
   
   all_points1 <- get_nearest_stat(data_xy = HM_stats_1[, c("XX", "YY", "CC")],
                                   nearest = T) %>%
-    lapply(., function(y) subset(y, D < 11)) %>%
+    lapply(., function(y) subset(y, D < 11)) %>% #distance between stations
     .[lapply(., function(y) dim(y)[1]) != 1] 
-  
+  all_points1
   stats_all_points1 <- lapply(all_points1, function(z) z$NN)
   res_stats_all_points1 <- NULL
   for(i in 1:2){
     res_stats_all_points1[[i]]  <- lapply(stats_all_points1, function(x) setequal(x, stats_all_points1[[i]])) %>%
-      .[. == T] 
+      .[. == T]
     stats_all_points1[names(res_stats_all_points1)] <- NULL
   }
 
-  res_stats_all_points1 <- res_stats_all_points1 %>% unique %>% 
-    .[lapply(., function(x) length(x)) > 1] %>% 
+  res_stats_all_points1 <- res_stats_all_points1 %>% unique %>%
+    .[lapply(., function(x) length(x)) > 1] %>%
     lapply(., function(x) {
       res <- all_points1[[names(x)[1]]]         # can other number
       colnames(res) <- c("XX","YY","CC","DD")
       return(res)
     })
-  
+
   HM_stats_2 <- del_double_points(list_of_points = res_stats_all_points1,
                                   data_set = HM_stats_1,
                                   is_it_coordinates = T)
   rownames(HM_stats_2) <- NULL
-  
+
   HMdata_dtn_del_2 <- del_double_points(list_of_points = res_stats_all_points1,
                                         data_set = HMdata_dtn_del_1)
-  
+
   HMdata_dtx_del_2 <- del_double_points(list_of_points = res_stats_all_points1,
                                         data_set = HMdata_dtx_del_1)
-  
+
   HMdata_mtn_del_2 <- del_double_points(list_of_points = res_stats_all_points1,
                                         data_set = HMdata_mtn_del_1)
-  
+
   HMdata_mtx_del_2 <- del_double_points(list_of_points = res_stats_all_points1,
                                         data_set = HMdata_mtx_del_1)
   ### Third iteration
   
   get_nearest_stat(data_xy = HM_stats_2[, c("XX", "YY", "CC")],
-                                  nearest = T) %>%
-    lapply(., function(y) subset(y, D < 11)) %>%
+                   nearest = T) %>%
+    lapply(., function(y) subset(y, D < 11)) %>% #distance between stations
     .[lapply(., function(y) dim(y)[1]) != 1] 
   
   
 #### revisiting if lat long points are inside of pixels
   
   xy_data <- HM_stats_2 %>%
-    .[, c("CC", "XX", "YY")]
+    .[, c("CC","n_mean", "XX", "YY")]
   coordinates(xy_data) <- ~XX+YY
   projection(xy_data) <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
   
@@ -204,13 +206,29 @@ r_raster <- tx_lst[[1]]
 
 plot(r_raster)
 plot(xy_data, add = T)
-points_to_add <- click(r_raster, xy = T, n = 15, type = "o", id = T) %>%
-  mutate(XX = x, YY = y, CC = paste("X", value, sep = ""),
-         CC_NEW = NA, NN = NA, DRE = NA, ZZ = NA, ZZ_n = NA, 
-         VSS = NA, GGR = NA) %>%
-  .[,c("CC", "CC_NEW", "NN", "DRE", "ZZ","XX", "YY", "ZZ_n", "GGR", "VSS")]
 
+#if you want to test new points
 
+# points_to_add <- click(r_raster, xy = T, n = 15, type = "o", id = T) %>%
+#   mutate(XX = x, YY = y, CC = paste("X", value, sep = ""),
+#          CC_NEW = NA, NN = NA, DRE = NA, ZZ = NA, ZZ_n = NA,
+#          VSS = NA, GGR = NA, n_mean = NA) %>%
+#   .[,c("CC", "CC_NEW", "NN", "DRE", "ZZ","XX", "YY", "ZZ_n", "GGR", "VSS","n_mean")]
+
+#if you want not to test new points
+
+points_to_add <- HM_stats_2[1:15,]
+points_to_add[!is.na(points_to_add)] <- NA
+points_to_add$CC <- c("X27.0020340028032", "X26.8526493672174", "X26.7674266616196", 
+                      "X25.4382673386644", "X26.048200451603", "X24.5450688975964", 
+                      "X24.004201867221", "X24.4257378771447", "X25.0963327921304", 
+                      "X25.3458760178903", "X26.8864654103558", "X26.0281581890115", 
+                      "X24.0694172732282", "X24.2028477612968", "X25.7964769465967")
+points_to_add$YY <- c(-4.45, -3.35, -2.15, -2.75, -7.55, -5.85, -9.75, -8.25, -4.65, 
+                      -7.55, -12.45, -14.05, -11.05, -9.35, -1.35)
+points_to_add$XX <- c(-75.85, -76.05, -74.05, -70.25, -72.55, -69.25, -72.35, -69.85, 
+                      -70.95, -68.05, -67.45, -67.85, -70.55, -68.15, -71.95)
+  
 ts_to_add <- split(points_to_add, seq(nrow(points_to_add))) %>%
   lapply(function(z) {
     
@@ -306,16 +324,16 @@ mclim_HMdata_tn <- 1:12 %>%
 ################################
 ###########
 
-tx_obs_normal <- cbind(mclim_HMdata_tx , HM_stats_2[,c("XX", "YY", "CC")] )
+tx_obs_normal <- cbind(mclim_HMdata_tx , HM_stats_2[,c("XX", "YY", "CC","n_mean")] )
 coordinates(tx_obs_normal) <- ~XX+YY
 projection(tx_obs_normal) <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
-names(tx_obs_normal) <- c( paste("To", 1:12, sep = ""), "CC")
+names(tx_obs_normal) <- c( paste("To", 1:12, sep = ""), "CC", "n_mean")
 
 
-tn_obs_normal <- cbind(mclim_HMdata_tn , HM_stats_2[,c("XX", "YY", "CC")] )
+tn_obs_normal <- cbind(mclim_HMdata_tn , HM_stats_2[,c("XX", "YY", "CC","n_mean")] )
 coordinates(tn_obs_normal) <- ~XX+YY
 projection(tn_obs_normal) <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
-names(tn_obs_normal) <- c( paste("To", 1:12, sep = ""), "CC")
+names(tn_obs_normal) <- c( paste("To", 1:12, sep = ""), "CC", "n_mean")
 
 ##############################
 ##########

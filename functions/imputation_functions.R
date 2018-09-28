@@ -218,7 +218,7 @@ qmap_temp <- function(obs_ts, gridded_ts)
     
     qm_fit <- fitQmapQUANT(coredata(res_mm$obs_ts), 
                            coredata(res_mm$gridded_ts) ,
-                           qstep = 0.01, nboot = 1, wet.day = F, type = "tricube")
+                           qstep = 0.01, nboot = 1, wet.day = F, type = "linear")
     
     coredata(res_ts$gridded_ts[ format(time(res_ts$gridded_ts), "%m") %in% mm[[i]] ]) <- doQmapQUANT(coredata(res_mm$gridded_ts[ format(time(res_mm$gridded_ts), "%m") %in% mm[[i]] ]), qm_fit, type="tricub") %>%
       as.numeric() %>%
