@@ -1,6 +1,9 @@
 # PISCO_Temp
 PISCO_Temp ([PISCO](http://ons.snirh.gob.pe/Peru/maproom/Monitoring/Meteorological/PISCO_reporte.pdf) Temperature) is an open source framework written in R for interpolating daily temperature observations at "topoclimatic" spatial scale (< 10km). Using digital elevation model (DEM) and remotely sensed observations of land skin temperature.The present interpolation procedure is mainly based on regression kriging. Likewise, the temporal variability of temperature is assured trought an [infilling procedure](https://link.springer.com/article/10.1007/s00704-017-2082-0) and a [pairwise homogenization](https://cran.r-project.org/web/packages/snht/snht.pdf). PISCO_Temp is currently being developed at [National Service of Meteorology and Hydrology](http://www.senamhi.gob.pe/). It is expected to produce a 1981-present (~1km or ~5km) gridded dataset of daily maximum and minimum air temperature for Peru.
 
+## Dataset
+PISCO_Temp can be downloaded [here](https://drive.google.com/open?id=1eGqhmJXBJfFSzUFz2RVqtbKIlOphpkcs)
+
 ## Code 
 It is expected to create an R package soon
 
